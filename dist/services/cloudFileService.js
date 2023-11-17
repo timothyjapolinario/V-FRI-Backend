@@ -39,28 +39,40 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var express_1 = __importDefault(require("express"));
-var cloudFileService_1 = require("./services/cloudFileService");
-var cors_1 = __importDefault(require("cors"));
-var app = (0, express_1.default)();
-app.use((0, cors_1.default)());
-var port = 3000;
-app.get("/cloudFile", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var cf, response;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, (0, cloudFileService_1.getAllCloudFiles)()];
+exports.getAllCloudFiles = void 0;
+var storage_1 = require("firebase/storage");
+var firebaseApp_1 = __importDefault(require("../firebase/firebaseApp"));
+var getAllCloudFiles = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var storage, storageRef, files, arr, _i, _a, cfRef, downloadUrl, cloudFile;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                storage = (0, storage_1.getStorage)(firebaseApp_1.default);
+                console.log(storage);
+                storageRef = (0, storage_1.ref)(storage);
+                return [4 /*yield*/, (0, storage_1.listAll)(storageRef)];
             case 1:
-                cf = _a.sent();
-                response = {
-                    message: "HELLO WORLDD",
-                    cf: cf,
+                files = _b.sent();
+                arr = [];
+                _i = 0, _a = files.items;
+                _b.label = 2;
+            case 2:
+                if (!(_i < _a.length)) return [3 /*break*/, 5];
+                cfRef = _a[_i];
+                return [4 /*yield*/, (0, storage_1.getDownloadURL)((0, storage_1.ref)(storage, "".concat(cfRef.name)))];
+            case 3:
+                downloadUrl = _b.sent();
+                cloudFile = {
+                    fileName: cfRef.name,
+                    downloadUrl: downloadUrl,
                 };
-                res.json(response);
-                return [2 /*return*/];
+                arr.push(cloudFile);
+                _b.label = 4;
+            case 4:
+                _i++;
+                return [3 /*break*/, 2];
+            case 5: return [2 /*return*/, arr];
         }
     });
-}); });
-app.listen(port, function () {
-    console.log("\u26A1\uFE0F[server]: Server is running at http://localhost:".concat(port));
-});
+}); };
+exports.getAllCloudFiles = getAllCloudFiles;
